@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIVERA: THE LAST FIGHT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;600;700&family=Rajdhani:wght@400;600;700&display=swap');
+
+  :root {
+    --red: #ff2244;
+    --gold: #ffd700;
+    --neon-blue: #00e5ff;
+    --neon-green: #39ff14;
+    --dark: #0a0a0f;
+    --darker: #050508;
+    --mid: #12121a;
+    --light-mid: #1e1e2e;
+    --text: #e8e8f0;
+    --text-dim: #8888aa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--darker);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* ===== ARENA BACKGROUND ===== */
+  #arena-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .spotlight {
+    position: absolute;
+    width: 300px;
+    height: 600px;
+    background: radial-gradient(ellipse at top, rgba(255,220,100,0.15) 0%, transparent 70%);
+    animation: spotMove 8s ease-in-out infinite alternate;
+  }
+  .spotlight-1 { left: 15%; top: -100px; animation-delay: 0s; }
+  .spotlight-2 { right: 15%; top: -100px; animation-delay: -4s; }
+  .spotlight-3 { left: 45%; top: -100px; width: 400px; opacity: 0.8; animation-delay: -2s; }
+
+  @keyframes spotMove {
+    from { transform: rotate(-8deg) translateX(-30px); }
+    to { transform: rotate(8deg) translateX(30px); }
+  }
+
+  .crowd-row {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    z-index: 1;
+  }
+
+  .crowd-figure {
+    width: 16px;
+    height: 36px;
+    background: #1a1a2e;
+    border-radius: 50% 50% 0 0;
+    position: relative;
+    animation: crowdBob 2s ease-in-out infinite;
+  }
+  .crowd-figure::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 12px; height: 12px;
+    background: #222240;
+    border-radius: 50%;
+  }
+  .crowd-figure:nth-child(odd) { animation-delay: -1s; height: 32px; background: #150a25; }
+  .crowd-figure:nth-child(3n) { animation-delay: -0.5s; height: 38px; background: #1a0a20; }
+
+  @keyframes crowdBob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .ring-ropes {
+    position: absolute;
+    bottom: 22%;
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    z-index: 2;
+  }
+  .ring-ropes::before, .ring-ropes::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, #cc3300 10%, #ff4400 50%, #cc3300 90%, transparent);
+    box-shadow: 0 0 10px #ff440055;
+  }
+  .ring-ropes::before { top: 0; }
+  .ring-ropes::after { top: 20px; background: linear-gradient(90deg, transparent, #884400 10%, #aa6600 50%, #884400 90%, transparent); }
+
+  .ring-floor {
+    position: absolute;
+    bottom: 18%;
+    left: 3%;
+    right: 3%;
+    height: 5%;
+    background: linear-gradient(180deg, #3a1a0a 0%, #2a1208 100%);
+    border-top: 2px solid #aa5500;
+    z-index: 1;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .screen.active { display: flex; }
+
+  /* ===== START SCREEN ===== */
+  #start-screen {
+    background: radial-gradient(ellipse at center, #1a0a2a 0%, #050508 100%);
+  }
+
+  .title-wrapper {
+    text-align: center;
+    position: relative;
+  }
+
+  .title-sub {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(14px, 3vw, 22px);
+    letter-spacing: 8px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    animation: flicker 3s infinite;
+  }
+
+  @keyframes flicker {
+    0%,95%,100% { opacity: 1; }
+    96%,98% { opacity: 0.3; }
+    97%,99% { opacity: 0.8; }
+  }
+
+  .title-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 160px);
+    line-height: 0.85;
+    background: linear-gradient(180deg, #ffffff 0%, #ffcc00 40%, #ff4400 80%, #aa0000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px #ff440088);
+    animation: titlePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%,100% { filter: drop-shadow(0 0 20px #ff440088); }
+    50% { filter: drop-shadow(0 0 50px #ff8800cc); }
+  }
+
+  .title-vs {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 4vw, 36px);
+    color: var(--neon-blue);
+    letter-spacing: 4px;
+    margin: 10px 0;
+    text-shadow: 0 0 20px var(--neon-blue);
+  }
+
+  .title-fight {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 6vw, 72px);
+    background: linear-gradient(90deg, var(--neon-blue), #ffffff, var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 6px;
+    filter: drop-shadow(0 0 15px var(--neon-blue));
+  }
+
+  .start-btn {
+    margin-top: 50px;
+    padding: 18px 60px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #ff2244, #cc0022);
+    color: white;
+    border: 2px solid #ff4466;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px #ff224488, inset 0 1px 0 #ff6680;
+    animation: btnPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes btnPulse {
+    0%,100% { box-shadow: 0 0 20px #ff224488, inset 0 1px 0 #ff6680; }
+    50% { box-shadow: 0 0 50px #ff2244cc, inset 0 1px 0 #ff6680; }
+  }
+
+  .start-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ff4466, #ff2244);
+  }
+
+  .start-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -60%;
+    width: 40%; height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    animation: shine 3s ease-in-out infinite;
+  }
+
+  @keyframes shine {
+    0% { left: -60%; }
+    100% { left: 160%; }
+  }
+
+  /* ===== INTRO SCREEN ===== */
+  #intro-screen {
+    background: #000;
+    padding: 40px;
+  }
+
+  .intro-text {
+    max-width: 700px;
+    text-align: center;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    font-size: clamp(16px, 2.5vw, 22px);
+    line-height: 1.8;
+    color: var(--text-dim);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 40px;
+    background: rgba(255,255,255,0.02);
+    position: relative;
+  }
+
+  .intro-text::before {
+    content: '"';
+    position: absolute;
+    top: -20px; left: 20px;
+    font-size: 80px;
+    color: var(--gold);
+    font-family: Georgia, serif;
+    line-height: 1;
+    opacity: 0.6;
+  }
+
+  .intro-text span { color: var(--gold); font-weight: 600; }
+
+  .intro-btn {
+    margin-top: 40px;
+    padding: 15px 50px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 4px;
+    background: transparent;
+    color: var(--neon-blue);
+    border: 2px solid var(--neon-blue);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px var(--neon-blue)44, inset 0 0 15px transparent;
+  }
+
+  .intro-btn:hover {
+    background: var(--neon-blue);
+    color: #000;
+    box-shadow: 0 0 40px var(--neon-blue);
+  }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen {
+    background: transparent;
+    padding: 10px;
+    justify-content: flex-start;
+  }
+
+  /* HUD */
+  .hud {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(5,5,10,0.9);
+    border: 1px solid #333;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+
+  .fighter-hud {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .fighter-hud.right { align-items: flex-end; }
+
+  .fighter-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 3vw, 26px);
+    letter-spacing: 2px;
+  }
+
+  .fighter-name.rivera { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+  .fighter-name.danny { color: var(--red); text-shadow: 0 0 10px var(--red); }
+
+  .hp-bar-wrap {
+    width: 100%;
+    height: 20px;
+    background: #111;
+    border-radius: 3px;
+    border: 1px solid #333;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hp-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hp-bar.rivera-hp {
+    background: linear-gradient(90deg, #00aa00, var(--neon-green));
+    box-shadow: 0 0 10px var(--neon-green)88;
+  }
+
+  .hp-bar.danny-hp {
+    background: linear-gradient(90deg, var(--red), #ff6644);
+    box-shadow: 0 0 10px var(--red)88;
+    margin-left: auto;
+  }
+
+  .hp-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .hp-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .hud-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 70px;
+  }
+
+  .round-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  .round-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    text-shadow: 0 0 15px var(--gold);
+    line-height: 1;
+  }
+
+  .combo-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--neon-blue);
+    letter-spacing: 1px;
+    min-height: 16px;
+    text-shadow: 0 0 8px var(--neon-blue);
+  }
+
+  /* FIGHTERS */
+  .fighters-area {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 20px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    height: clamp(160px, 22vh, 240px);
+    position: relative;
+  }
+
+  .fighter {
+    width: clamp(100px, 14vw, 160px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+  }
+
+  /* SVG Boxer */
+  .boxer-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transition: transform 0.1s;
+  }
+
+  .fighter.punch { animation: punchAnim 0.4s ease-out; }
+  .fighter.hit { animation: hitAnim 0.4s ease-out; }
+  .fighter.ko { animation: koAnim 1s ease-out forwards; }
+
+  @keyframes punchAnim {
+    0% { transform: translateX(0) scaleX(1); }
+    30% { transform: translateX(30px) scaleX(1.05); }
+    60% { transform: translateX(15px) scaleX(1); }
+    100% { transform: translateX(0) scaleX(1); }
+  }
+
+  @keyframes hitAnim {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-15px) rotate(-5deg); }
+    40% { transform: translateX(8px) rotate(3deg); }
+    60% { transform: translateX(-5px) rotate(-2deg); }
+  }
+
+  @keyframes koAnim {
+    0% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(-20px) rotate(-15deg); }
+    100% { transform: translateY(40px) rotate(-90deg); opacity: 0; }
+  }
+
+  .fighter-right { transform: scaleX(-1); }
+
+  .punch-effect {
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold), 2px 2px 0 #aa4400;
+    pointer-events: none;
+    animation: punchText 0.6s ease-out forwards;
+    z-index: 20;
+    white-space: nowrap;
+  }
+
+  @keyframes punchText {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5) rotate(-15deg); }
+    40% { opacity: 1; transform: translate(-50%, -80%) scale(1.2) rotate(5deg); }
+    100% { opacity: 0; transform: translate(-50%, -130%) scale(0.8) rotate(-5deg); }
+  }
+
+  .spark {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    pointer-events: none;
+    animation: sparkFly 0.5s ease-out forwards;
+  }
+
+  @keyframes sparkFly {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: var(--spark-end) scale(0); }
+  }
+
+  /* QUESTION AREA */
+  .question-area {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(10,10,20,0.95);
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 20px;
+    backdrop-filter: blur(20px);
+    flex-shrink: 0;
+  }
+
+  .question-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .question-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.4;
+    min-height: 50px;
+  }
+
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .answer-btn {
+    padding: clamp(10px, 2vw, 16px) clamp(12px, 2vw, 20px);
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 400;
+    text-align: left;
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    border: 1px solid #2a2a4a;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+  }
+
+  .answer-btn::before {
+    content: attr(data-letter);
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    background: #1a1a2e;
+    border-radius: 4px;
+    margin-right: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: var(--neon-blue);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    background: rgba(0,229,255,0.08);
+    border-color: var(--neon-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,229,255,0.15);
+  }
+
+  .answer-btn:hover:not(:disabled)::before {
+    background: var(--neon-blue);
+    color: #000;
+  }
+
+  .answer-btn.correct {
+    background: rgba(57,255,20,0.15);
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(57,255,20,0.3);
+  }
+
+  .answer-btn.wrong {
+    background: rgba(255,34,68,0.15);
+    border-color: var(--red);
+    color: var(--red);
+    box-shadow: 0 0 20px rgba(255,34,68,0.3);
+  }
+
+  .answer-btn:disabled { cursor: not-allowed; }
+
+  /* SCREEN SHAKE */
+  @keyframes screenShake {
+    0%,100% { transform: translate(0,0); }
+    10% { transform: translate(-10px, -5px); }
+    20% { transform: translate(10px, 5px); }
+    30% { transform: translate(-8px, 8px); }
+    40% { transform: translate(8px, -8px); }
+    50% { transform: translate(-5px, 5px); }
+    60% { transform: translate(5px, -5px); }
+    70% { transform: translate(-3px, 3px); }
+    80% { transform: translate(3px, -3px); }
+  }
+
+  body.shake { animation: screenShake 0.5s ease-out; }
+
+  /* SCREEN FLASH */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .flash-overlay.flash-red { background: var(--red); animation: flashAnim 0.4s ease-out; }
+  .flash-overlay.flash-gold { background: var(--gold); animation: flashAnim 0.3s ease-out; }
+
+  @keyframes flashAnim {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  /* ===== VICTORY SCREEN ===== */
+  #victory-screen {
+    background: radial-gradient(ellipse at center, #1a0a0a 0%, #050508 100%);
+  }
+
+  .victory-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 10vw, 120px);
+    background: linear-gradient(180deg, #ffffff 0%, var(--gold) 50%, #ff8800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px var(--gold));
+    text-align: center;
+    animation: victoryPulse 1.5s ease-in-out infinite;
+    line-height: 0.9;
+  }
+
+  @keyframes victoryPulse {
+    0%,100% { filter: drop-shadow(0 0 30px var(--gold)); }
+    50% { filter: drop-shadow(0 0 80px #ffaa00); }
+  }
+
+  .victory-sub {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(20px, 3vw, 32px);
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .trophy {
+    font-size: clamp(60px, 10vw, 100px);
+    text-align: center;
+    animation: trophyFloat 2s ease-in-out infinite;
+    display: block;
+  }
+
+  @keyframes trophyFloat {
+    0%,100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  .score-display {
+    margin: 20px 0;
+    padding: 20px 40px;
+    background: rgba(255,215,0,0.08);
+    border: 1px solid var(--gold)44;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 60px;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+  }
+
+  .restart-btn {
+    margin-top: 20px;
+    padding: 15px 50px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #ff2244, #cc0022);
+    color: white;
+    border: 2px solid #ff4466;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 25px #ff224466;
+  }
+
+  .restart-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px #ff2244;
+  }
+
+  /* DEFEAT SCREEN */
+  #defeat-screen {
+    background: radial-gradient(ellipse at center, #1a0000 0%, #050508 100%);
+  }
+
+  .defeat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 10vw, 120px);
+    color: var(--red);
+    filter: drop-shadow(0 0 30px var(--red));
+    text-align: center;
+    animation: defeatPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes defeatPulse {
+    0%,100% { filter: drop-shadow(0 0 20px var(--red)); }
+    50% { filter: drop-shadow(0 0 60px var(--red)); }
+  }
+
+  /* KO OVERLAY */
+  #ko-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.8);
+  }
+  #ko-overlay.active { display: flex; }
+
+  .ko-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 200px);
+    background: linear-gradient(180deg, #ffffff 0%, #ffdd00 40%, #ff4400 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px #ff8800);
+    animation: koTextAnim 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    text-align: center;
+  }
+
+  @keyframes koTextAnim {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+    80% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  /* FIREWORKS */
+  .firework {
+    position: fixed;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 200;
+    animation: fireworkAnim 1s ease-out forwards;
+  }
+
+  @keyframes fireworkAnim {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: var(--fw-end) scale(0); opacity: 0; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .answers { grid-template-columns: 1fr; }
+    .fighters-area { height: clamp(120px, 20vh, 180px); }
+    .hud { padding: 8px; }
+  }
+
+  @media (max-height: 700px) {
+    .fighters-area { height: 140px; }
+    .question-area { padding: 12px; }
+    .question-text { margin-bottom: 10px; }
+    .answers { gap: 6px; }
+    .answer-btn { padding: 8px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ARENA BG -->
+<div id="arena-bg">
+  <div class="spotlight spotlight-1"></div>
+  <div class="spotlight spotlight-2"></div>
+  <div class="spotlight spotlight-3"></div>
+  <div class="ring-floor"></div>
+  <div class="ring-ropes"></div>
+  <div class="crowd-row" id="crowd-row"></div>
+</div>
+
+<!-- FLASH OVERLAY -->
+<div class="flash-overlay" id="flash"></div>
+
+<!-- KO OVERLAY -->
+<div id="ko-overlay">
+  <div class="ko-text">K·O·!</div>
+</div>
+
+<!-- ===== START SCREEN ===== -->
+<div class="screen active" id="start-screen">
+  <div class="title-wrapper">
+    <div class="title-sub">Қазақ Әдебиеті · Мәтін Бойынша</div>
+    <div class="title-main">RIVERA</div>
+    <div class="title-vs">★ СОҢҒЫ ШАЙҚАС ★</div>
+    <div class="title-fight">THE LAST FIGHT</div>
+  </div>
+  <button class="start-btn" onclick="showIntro()">⚡ БАСТАУ ⚡</button>
+</div>
+
+<!-- ===== INTRO SCREEN ===== -->
+<div class="screen" id="intro-screen">
+  <div class="intro-text">
+    Бұл — <span>Ривераның</span> соңғы шайқасы.<br><br>
+    Мексикадан шыққан жас боксшы <span>Ривера</span> бүкіл елін мақтан етуге шыққан.
+    Алдында тұрған қарсылас — <span>Дэнни</span>, танымал әрі қауіпті чемпион.<br><br>
+    Ринг — шайқас алаңы. Сен — <span>Ривера</span>.<br>
+    Сұрақтарға дұрыс жауап бер, жұдырықты ти, <span>Мексиканы жеңіске жеткіз!</span>
+  </div>
+  <button class="intro-btn" onclick="startGame()">⚔️ ШАЙҚАСҚА КІР</button>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div class="screen" id="game-screen">
+  <!-- HUD -->
+  <div class="hud">
+    <div class="fighter-hud left">
+      <div class="fighter-name rivera">RIVERA</div>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar rivera-hp" id="rivera-hp-bar" style="width:100%"></div>
+      </div>
+      <div class="hp-text"><span id="rivera-hp-text">100</span>/100 HP</div>
+    </div>
+    <div class="hud-center">
+      <div class="round-label">РАУНД</div>
+      <div class="round-num" id="round-num">1</div>
+      <div class="combo-badge" id="combo-badge"></div>
+    </div>
+    <div class="fighter-hud right">
+      <div class="fighter-name danny">ДЭННИ</div>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar danny-hp" id="danny-hp-bar" style="width:100%; margin-left:auto;"></div>
+      </div>
+      <div class="hp-text" style="text-align:right"><span id="danny-hp-text">100</span>/100 HP</div>
+    </div>
+  </div>
+
+  <!-- FIGHTERS -->
+  <div class="fighters-area">
+    <div class="fighter" id="fighter-rivera">
+      <svg class="boxer-svg" viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rivera - Green -->
+        <!-- Head -->
+        <ellipse cx="60" cy="28" rx="22" ry="24" fill="#c8a882"/>
+        <!-- Hair -->
+        <ellipse cx="60" cy="10" rx="20" ry="10" fill="#2a1a0a"/>
+        <!-- Face -->
+        <circle cx="52" cy="28" r="4" fill="#1a1a1a"/>
+        <circle cx="68" cy="28" r="4" fill="#1a1a1a"/>
+        <path d="M52 38 Q60 44 68 38" stroke="#8a5a3a" stroke-width="2" fill="none"/>
+        <!-- Neck -->
+        <rect x="52" y="48" width="16" height="12" rx="4" fill="#c8a882"/>
+        <!-- Body torso -->
+        <path d="M35 60 Q30 100 28 130 L92 130 Q90 100 85 60 Z" fill="#39ff14"/>
+        <!-- Green boxing shorts -->
+        <rect x="36" y="118" width="48" height="30" rx="4" fill="#00aa00"/>
+        <!-- Belt -->
+        <rect x="34" y="116" width="52" height="8" rx="2" fill="#ffd700"/>
+        <rect x="54" y="113" width="12" height="14" rx="2" fill="#ffaa00"/>
+        <!-- Left arm (punching) -->
+        <path d="M35 65 Q15 80 10 95" stroke="#c8a882" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Left glove -->
+        <ellipse cx="10" cy="100" rx="12" ry="10" fill="#cc0000"/>
+        <!-- Right arm -->
+        <path d="M85 65 Q100 75 105 85" stroke="#c8a882" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Right glove -->
+        <ellipse cx="108" cy="88" rx="12" ry="10" fill="#cc0000"/>
+        <!-- Legs -->
+        <path d="M44 148 Q40 175 38 210" stroke="#c8a882" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <path d="M76 148 Q80 175 82 210" stroke="#c8a882" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <!-- Shoes -->
+        <ellipse cx="36" cy="210" rx="16" ry="8" fill="#1a1a1a"/>
+        <ellipse cx="84" cy="210" rx="16" ry="8" fill="#1a1a1a"/>
+        <!-- Headband -->
+        <path d="M40 14 Q60 8 80 14" stroke="#ffd700" stroke-width="4" fill="none"/>
+        <!-- MX flag patch -->
+        <rect x="56" y="70" width="8" height="14" rx="1" fill="#006847"/>
+        <rect x="60" y="70" width="4" height="14" rx="0" fill="#fff"/>
+        <rect x="62" y="70" width="6" height="14" rx="0" fill="#ce1126"/>
+      </svg>
+    </div>
+
+    <div class="fighter" id="fighter-danny" style="transform: scaleX(-1);">
+      <svg class="boxer-svg" viewBox="0 0 120 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Danny - Red -->
+        <!-- Head -->
+        <ellipse cx="60" cy="28" rx="22" ry="24" fill="#d4aa88"/>
+        <!-- Hair -->
+        <ellipse cx="60" cy="9" rx="21" ry="9" fill="#aa6622"/>
+        <!-- Face -->
+        <circle cx="52" cy="28" r="4" fill="#1a1a1a"/>
+        <circle cx="68" cy="28" r="4" fill="#1a1a1a"/>
+        <path d="M53 40 Q60 44 67 40" stroke="#8a5a3a" stroke-width="2" fill="none"/>
+        <!-- Neck -->
+        <rect x="52" y="48" width="16" height="12" rx="4" fill="#d4aa88"/>
+        <!-- Body torso -->
+        <path d="M35 60 Q30 100 28 130 L92 130 Q90 100 85 60 Z" fill="#cc2200"/>
+        <!-- Shorts -->
+        <rect x="36" y="118" width="48" height="30" rx="4" fill="#880000"/>
+        <!-- Belt -->
+        <rect x="34" y="116" width="52" height="8" rx="2" fill="#ffd700"/>
+        <rect x="54" y="113" width="12" height="14" rx="2" fill="#ffaa00"/>
+        <!-- Left arm -->
+        <path d="M35 65 Q15 80 10 95" stroke="#d4aa88" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Left glove -->
+        <ellipse cx="10" cy="100" rx="12" ry="10" fill="#003399"/>
+        <!-- Right arm -->
+        <path d="M85 65 Q105 78 110 90" stroke="#d4aa88" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <!-- Right glove -->
+        <ellipse cx="112" cy="92" rx="12" ry="10" fill="#003399"/>
+        <!-- Legs -->
+        <path d="M44 148 Q40 175 38 210" stroke="#d4aa88" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <path d="M76 148 Q80 175 82 210" stroke="#d4aa88" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <!-- Shoes -->
+        <ellipse cx="36" cy="210" rx="16" ry="8" fill="#1a1a1a"/>
+        <ellipse cx="84" cy="210" rx="16" ry="8" fill="#1a1a1a"/>
+        <!-- Star on shirt -->
+        <text x="55" y="95" font-size="18" fill="#ffd700" text-anchor="middle">★</text>
+        <!-- Scar (menacing) -->
+        <path d="M54 22 L58 30" stroke="#aa6633" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- QUESTION AREA -->
+  <div class="question-area">
+    <div class="question-label">СҰРАҚ <span id="q-num">1</span> / <span id="q-total">10</span></div>
+    <div class="question-text" id="question-text">Сұрақ жүктелуде...</div>
+    <div class="answers" id="answers-grid"></div>
+  </div>
+</div>
+
+<!-- ===== VICTORY SCREEN ===== -->
+<div class="screen" id="victory-screen">
+  <span class="trophy">🏆</span>
+  <div class="victory-title">ЧЕМПИОН!</div>
+  <div class="victory-sub">Мексика жеңісі!</div>
+  <div class="score-display">
+    <div class="score-num" id="v-score">0</div>
+    <div class="score-label">ДҰРЫС ЖАУАП</div>
+  </div>
+  <div style="font-family:'Oswald',sans-serif;color:var(--text-dim);text-align:center;font-size:18px;margin-bottom:10px;">
+    Сен Ривераны жеңіске жеткіздің! 🌟
+  </div>
+  <button class="restart-btn" onclick="restartGame()">🔄 ҚАЙТА ОЙНАУ</button>
+</div>
+
+<!-- ===== DEFEAT SCREEN ===== -->
+<div class="screen" id="defeat-screen">
+  <div class="defeat-title">ЖЕҢІЛДІҢ</div>
+  <div style="font-family:'Oswald',sans-serif;color:var(--text-dim);font-size:24px;letter-spacing:2px;text-align:center;margin:20px 0;">
+    Ривера ринге жығылды...
+  </div>
+  <div class="score-display">
+    <div class="score-num" id="d-score">0</div>
+    <div class="score-label">ДҰРЫС ЖАУАП</div>
+  </div>
+  <div style="font-family:'Oswald',sans-serif;color:var(--text-dim);text-align:center;font-size:18px;margin-bottom:10px;">
+    Бас тартпа, қайтадан тырыс!
+  </div>
+  <button class="restart-btn" onclick="restartGame()">🔄 ҚАЙТА ОЙНАУ</button>
+</div>
+
+<script>
+// ===== CROWD =====
+(function buildCrowd() {
+  const row = document.getElementById('crowd-row');
+  for (let i = 0; i < 80; i++) {
+    const fig = document.createElement('div');
+    fig.className = 'crowd-figure';
+    row.appendChild(fig);
+  }
+})();
+
+// ===== AUDIO =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx;
+
+function getCtx() {
+  if (!ctx) ctx = new AudioCtx();
+  return ctx;
+}
+
+function playHit() {
+  try {
+    const c = getCtx();
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.connect(gain); gain.connect(c.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, c.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(60, c.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.4, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2);
+    osc.start(); osc.stop(c.currentTime + 0.2);
+  } catch(e) {}
+}
+
+function playPunch() {
+  try {
+    const c = getCtx();
+    const buf = c.createBuffer(1, c.sampleRate * 0.1, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = c.createBufferSource();
+    const gain = c.createGain();
+    src.buffer = buf; src.connect(gain); gain.connect(c.destination);
+    gain.gain.setValueAtTime(0.6, c.currentTime);
+    src.start();
+    const osc = c.createOscillator();
+    const g2 = c.createGain();
+    osc.connect(g2); g2.connect(c.destination);
+    osc.frequency.setValueAtTime(300, c.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.12);
+    g2.gain.setValueAtTime(0.3, c.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.12);
+    osc.start(); osc.stop(c.currentTime + 0.12);
+  } catch(e) {}
+}
+
+function playKO() {
+  try {
+    const c = getCtx();
+    [0,0.1,0.2,0.3,0.4].forEach((t,i) => {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.connect(gain); gain.connect(c.destination);
+      osc.frequency.value = 440 + i*110;
+      gain.gain.setValueAtTime(0.3, c.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + t + 0.15);
+      osc.start(c.currentTime + t);
+      osc.stop(c.currentTime + t + 0.15);
+    });
+  } catch(e) {}
+}
+
+function playCrowd() {
+  try {
+    const c = getCtx();
+    const dur = 0.6;
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.3 * Math.sin(i / data.length * Math.PI);
+    }
+    const src = c.createBufferSource();
+    const gain = c.createGain();
+    src.buffer = buf; src.connect(gain); gain.connect(c.destination);
+    gain.gain.value = 0.2;
+    src.start();
+  } catch(e) {}
+}
+
+// ===== QUESTIONS =====
+const questions = [
+  {
+    q: "Ривераның негізгі қарсыласы кім болды?",
+    answers: ["Роберт", "Майкл", "Дэнни", "Спайдер"],
+    correct: 2
+  },
+  {
+    q: "Ривера не үшін күресті?",
+    answers: ["Ақша үшін", "Даңқ үшін", "Өз елі үшін", "Кек үшін"],
+    correct: 2
+  },
+  {
+    q: "Дэнни қандай боксшы болды?",
+    answers: ["Әлсіз және сенімсіз", "Танымал әрі қауіпті", "Жас тәжірибесіз", "Қорқақ"],
+    correct: 1
+  },
+  {
+    q: "Ривера қай елден шыққан боксшы?",
+    answers: ["Аргентина", "Бразилия", "Мексика", "Куба"],
+    correct: 2
+  },
+  {
+    q: "Ривера шайқасқа қалай дайындалды?",
+    answers: ["Мүлде дайындалмады", "Ауыр жаттығулармен", "Достарымен ойнап", "Ұйқымен"],
+    correct: 1
+  },
+  {
+    q: "Шайқас барысында Ривераның ең басты күші қайдан келді?",
+    answers: ["Спорт залынан", "Тренерінен", "Еліне деген сүйіспеншіліктен", "Жүлдеден"],
+    correct: 2
+  },
+  {
+    q: "Ривера Дэннимен ұрысқанда не сезінді?",
+    answers: ["Қорқыныш пен дал-дал", "Ашу мен табандылық", "Бейғамдық", "Шаршау"],
+    correct: 1
+  },
+  {
+    q: "Мәтінде Ривераның жеңісі не деп суреттелді?",
+    answers: ["Жай ғана спорт жетістігі", "Мексиканың ұлттық мақтанышы", "Кездейсоқ оқиға", "Жұмбақ жеңіс"],
+    correct: 1
+  },
+  {
+    q: "Дэнни Ривераны кім деп санады?",
+    answers: ["Мықты қарсылас", "Жеңіл олжа", "Достық жарысшы", "Танымал чемпион"],
+    correct: 1
+  },
+  {
+    q: "Соңғы раундда Ривера не үшін өзіне-өзі рух берді?",
+    answers: ["Жүлде ақшасы үшін", "Тренері үшін", "Мексика халқы үшін", "Жеке даңқы үшін"],
+    correct: 2
+  }
+];
+
+// ===== GAME STATE =====
+let state = {};
+
+function initState() {
+  state = {
+    riveraHP: 100,
+    dannyHP: 100,
+    currentQ: 0,
+    combo: 0,
+    score: 0,
+    answered: false,
+    gameActive: false
+  };
+}
+
+// ===== SCREEN TRANSITIONS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showIntro() { showScreen('intro-screen'); }
+
+function startGame() {
+  initState();
+  showScreen('game-screen');
+  state.gameActive = true;
+  loadQuestion();
+}
+
+function restartGame() { showScreen('start-screen'); }
+
+// ===== QUESTION LOGIC =====
+function loadQuestion() {
+  if (state.currentQ >= questions.length) {
+    endGame(true);
+    return;
+  }
+
+  const q = questions[state.currentQ];
+  document.getElementById('q-num').textContent = state.currentQ + 1;
+  document.getElementById('q-total').textContent = questions.length;
+  document.getElementById('round-num').textContent = state.currentQ + 1;
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('combo-badge').textContent = state.combo >= 2 ? `COMBO x${state.combo}!` : '';
+
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.setAttribute('data-letter', letters[i]);
+    btn.textContent = ans;
+    btn.onclick = () => handleAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  state.answered = false;
+}
+
+function handleAnswer(idx) {
+  if (state.answered || !state.gameActive) return;
+  state.answered = true;
+
+  const q = questions[state.currentQ];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(idx === q.correct ? 'correct' : 'wrong');
+  btns[q.correct].classList.add('correct');
+
+  if (idx === q.correct) {
+    // Correct!
+    state.combo++;
+    state.score++;
+    const dmg = state.combo >= 3 ? 15 : 10;
+    state.dannyHP = Math.max(0, state.dannyHP - dmg);
+    updateHP();
+    playPunch();
+    playCrowd();
+    showPunchEffect('rivera');
+    animateFighter('fighter-rivera', 'punch');
+    animateFighter('fighter-danny', 'hit');
+    flashScreen('gold');
+  } else {
+    // Wrong!
+    state.combo = 0;
+    state.riveraHP = Math.max(0, state.riveraHP - 15);
+    updateHP();
+    playHit();
+    showPunchEffect('danny');
+    animateFighter('fighter-danny', 'punch');
+    animateFighter('fighter-rivera', 'hit');
+    flashScreen('red');
+    shakeScreen();
+  }
+
+  document.getElementById('combo-badge').textContent = state.combo >= 2 ? `COMBO x${state.combo}!` : '';
+
+  // Check game over conditions
+  if (state.dannyHP <= 0) {
+    setTimeout(() => triggerKO(), 600);
+    return;
+  }
+  if (state.riveraHP <= 0) {
+    setTimeout(() => endGame(false), 1000);
+    return;
+  }
+
+  state.currentQ++;
+  setTimeout(() => loadQuestion(), 1400);
+}
+
+function updateHP() {
+  document.getElementById('rivera-hp-bar').style.width = state.riveraHP + '%';
+  document.getElementById('danny-hp-bar').style.width = state.dannyHP + '%';
+  document.getElementById('rivera-hp-text').textContent = state.riveraHP;
+  document.getElementById('danny-hp-text').textContent = state.dannyHP;
+}
+
+function animateFighter(id, type) {
+  const el = document.getElementById(id);
+  el.classList.remove('punch', 'hit', 'ko');
+  void el.offsetWidth;
+  el.classList.add(type);
+  setTimeout(() => el.classList.remove(type), 500);
+}
+
+function showPunchEffect(who) {
+  const area = document.querySelector('.fighters-area');
+  const el = document.createElement('div');
+  el.className = 'punch-effect';
+
+  const words = who === 'rivera'
+    ? ['POW!', 'BAM!', 'ЖАРАЙСЫҢ!', 'COMBO!', 'МЫҚТЫ!'][Math.floor(Math.random()*5)]
+    : ['MISS!', 'АУ!', 'ЖОК!'][Math.floor(Math.random()*3)];
+
+  el.textContent = words;
+  el.style.left = (who === 'rivera' ? '65%' : '35%');
+  el.style.top = '30%';
+  area.appendChild(el);
+
+  // Sparks
+  for (let i = 0; i < 8; i++) {
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    const angle = (i / 8) * Math.PI * 2;
+    const dist = 40 + Math.random() * 40;
+    spark.style.cssText = `left:${who==='rivera'?65:35}%;top:35%;--spark-end:translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;
+    area.appendChild(spark);
+    setTimeout(() => spark.remove(), 600);
+  }
+
+  setTimeout(() => el.remove(), 700);
+}
+
+function flashScreen(color) {
+  const flash = document.getElementById('flash');
+  flash.className = `flash-overlay flash-${color}`;
+  setTimeout(() => flash.className = 'flash-overlay', 400);
+}
+
+function shakeScreen() {
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 500);
+}
+
+function triggerKO() {
+  playKO();
+  animateFighter('fighter-danny', 'ko');
+  const overlay = document.getElementById('ko-overlay');
+  overlay.classList.add('active');
+  launchFireworks();
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    endGame(true);
+  }, 2500);
+}
+
+function endGame(victory) {
+  state.gameActive = false;
+  if (victory) {
+    document.getElementById('v-score').textContent = `${state.score} / ${questions.length}`;
+    showScreen('victory-screen');
+    launchFireworks();
+  } else {
+    document.getElementById('d-score').textContent = `${state.score} / ${questions.length}`;
+    showScreen('defeat-screen');
+  }
+}
+
+function launchFireworks() {
+  const colors = ['#ffd700','#ff2244','#00e5ff','#39ff14','#ff8800','#ffffff'];
+  for (let burst = 0; burst < 6; burst++) {
+    setTimeout(() => {
+      const cx = 10 + Math.random() * 80;
+      const cy = 10 + Math.random() * 60;
+      for (let i = 0; i < 16; i++) {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        const angle = (i / 16) * Math.PI * 2;
+        const dist = 60 + Math.random() * 80;
+        fw.style.cssText = `left:${cx}vw;top:${cy}vh;background:${colors[Math.floor(Math.random()*colors.length)]};--fw-end:translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;
+        document.body.appendChild(fw);
+        setTimeout(() => fw.remove(), 1100);
+      }
+    }, burst * 300);
+  }
+}
+</script>
+</body>
+</html>
